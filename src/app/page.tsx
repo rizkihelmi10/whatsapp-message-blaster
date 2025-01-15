@@ -1,12 +1,33 @@
 "use client";
-import { useState} from "react";
+import { useEffect, useState} from "react";
 
 export default function Home() {
   const [recipients, setRecipients] = useState([{ name: "", phone: "" }]);
   const [messageTemplate, setMessageTemplate] = useState(
-    `Assalamualaikum Wr. Wb.\n\nYth. Bapak/Ibu {name}\n*Nasabah Bank Syariah Indonesia KCP Jakarta Rawamangun*\n\nPerkenalkan saya Fenty pegawai BSI KCP Rawamangun\n\nSemoga Bapak/Ibu {name} senantiasa sehat dan dalam lindungan Allah SWT.\n\nMohon segera pindah (migrasi) dan aktifkan BSI Mobile Bapak/Ibu {name} ke *Byond by BSI*. Aplikasi dapat di download di Play store atau App store *(mohon hanya download pada Play store atau App store)* , atau mengikuti pop up BSI mobile banking eksisting anda. Selanjutnya tinggal mengikuti tahapan yg ada.\n\nTerima kasih\u{1F64F}\u{1F3FB}\u{1F60A}\n\nWassalamu'alaikum Wr. Wb.\n\nNB: Apabila terdapat kendala pada saat aktivasi *Byond* , Bapak/Ibu dapat menghubungi petugas kami  dan atau datang langsung ke outlet BSI Kcp Jkt Rawamangun atau BSI terdekat.\n\n*Byond by BSI* #semuajadimudah`
+    `Assalamualaikum Wr. Wb.\n\nYth. Bapak/Ibu {name}\n*Nasabah Bank Syariah Indonesia KCP Jakarta Rawamangun*\n\nPerkenalkan saya Fenty pegawai BSI KCP Rawamangun\n\nSemoga Bapak/Ibu {name} senantiasa sehat dan dalam lindungan Allah SWT.\n\nMohon segera pindah (migrasi) dan aktifkan BSI Mobile Bapak/Ibu {name} ke *Byond by BSI*. Aplikasi dapat di download di Play store atau App store *(mohon hanya download pada Play store atau App store)* , atau mengikuti pop up BSI mobile banking eksisting anda. Selanjutnya tinggal mengikuti tahapan yg ada.\n\nTerima kasih\u{1F64F}\u{1F3FB}\u{1F60A}\n\nWassalamu'alaikum Wr. Wb.\n\nNB: Apabila terdapat kendala pada saat aktivasi *Byond* , Bapak/Ibu dapat menghubungi petugas kami  dan atau datang langsung ke outlet BSI Kcp Jkt Rawamangun atau BSI terdekat.\n\n*Byond by BSI*\n #semuajadimudah`
   );
-  // Add a new recipient
+  
+  useEffect(() =>{
+    const cachedRecipients = localStorage.getItem("recipients");
+    const cachedMessageTemplate = localStorage.getItem("messageTemplate");
+    if (cachedRecipients) {
+      setRecipients(JSON.parse(cachedRecipients));
+    }
+    if (cachedMessageTemplate) {
+      setMessageTemplate((cachedMessageTemplate));
+      console.log(cachedMessageTemplate)
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("recipients", JSON.stringify(recipients));
+  }, [recipients]);
+
+  // Save message template to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("messageTemplate", messageTemplate);
+  }, [messageTemplate]);
+
   const addRecipient = () => {
     setRecipients([...recipients, { name: "", phone: "" }]);
   };
@@ -25,6 +46,12 @@ export default function Home() {
     const link = `https://wa.me/${recipient.phone}?text=${encodedMessage}`;
     console.log(link);
     return link;
+  };
+
+  const resetData = () => {
+    setRecipients([{ name: "", phone: "" }]);
+    localStorage.removeItem("recipients");
+    localStorage.removeItem("messageTemplate"); 
   };
 
   return (
@@ -78,6 +105,12 @@ export default function Home() {
         onClick={addRecipient}
       >
         Add Recipient
+      </button>
+      <button
+        className="px-4 py-2 ml-4 bg-red-500 text-white rounded hover:bg-red-600"
+        onClick={resetData}
+      >
+        Reset Receipients
       </button>
     </div>
   );
