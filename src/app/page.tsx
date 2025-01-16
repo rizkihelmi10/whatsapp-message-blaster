@@ -66,12 +66,14 @@ export default function Home() {
         const sheetName = workbook.Sheets[workbook.SheetNames[0]];
         const parsedData = XLSX.utils.sheet_to_json(sheetName);
 
-        const newRecipients = parsedData.map((row: any) => ({
-          name: row.Nama || "",
-          phone: row.No_HP || ""
-        }));
-        setRecipients(newRecipients);
-      }
+        const newRecipients = parsedData.map((row: unknown) => {
+          const typedRow = row as { Nama: string; No_HP: string };
+          return {
+            name: typedRow.Nama || "",
+            phone: typedRow.No_HP || ""
+          };
+        });
+        setRecipients(newRecipients);      }
     };    reader.readAsArrayBuffer(file);
   };
 
