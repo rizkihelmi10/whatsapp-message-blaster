@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState} from "react";
+import * as XLSX from "xlsx";
 
 export default function Home() {
   const [recipients, setRecipients] = useState([{ name: "", phone: "" }]);
@@ -54,6 +55,26 @@ export default function Home() {
     localStorage.removeItem("messageTemplate"); 
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      if (event.target && event.target.result) {
+        const data = new Uint8Array(event.target.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.Sheets[workbook.SheetNames[0]];
+        const parsedData = XLSX.utils.sheet_to_json(sheetName);
+
+        const newRecipients = parsedData.map((row: any) => ({
+          name: row.Nama || "",
+          phone: row.No_HP || ""
+        }));
+        setRecipients(newRecipients);
+      }
+    };    reader.readAsArrayBuffer(file);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 text-gray-900">
       <h1 className="text-2xl font-bold mb-4 text-gray-900">WhatsApp Personalized Message Sender</h1>
@@ -69,6 +90,23 @@ export default function Home() {
           placeholder="Enter your message template here."
         />
       </div>
+      <div className="mb-4">
+        <label className="block font-medium mb-2 text-gray-900">Upload Excel:</label>
+        <input
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={handleFileUpload}
+          className="mb-2"
+        />
+        <a
+          href="/template.xlsx" 
+          download="template.xlsx"
+          className="text-blue-500 underline"
+        >
+          Download Excel Template
+        </a>
+      </div>
+
 
       {/* Recipient Inputs */}
       <h2 className="text-xl font-semibold mb-2 text-gray-900">Recipients:</h2>
